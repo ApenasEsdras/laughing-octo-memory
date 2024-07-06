@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "288373616220",
+    "project_id": "dicio-b9624",
+    "storage_bucket": "dicio-b9624.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288373616220:android:df14c98eb786fe48ee4099",
+        "android_client_info": {
+          "package_name": "com.example.dicio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB08NUd1dUSOOoCsuP0HIB0nBu9qNtDqkM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

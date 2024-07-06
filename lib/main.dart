@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'src/core/controllers/pages_controlles.dart';
+import 'src/modules/home/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const GerenciaPages());
+        debugShowCheckedModeBanner: false,
+        home: const HomePage());
   }
 }

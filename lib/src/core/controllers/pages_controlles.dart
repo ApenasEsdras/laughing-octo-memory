@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../modules/favoritos/favoritos_page.dart';
 import '../../modules/historico/historico_page.dart';
 import '../../modules/home/home_page.dart';
-import '../../widgets/theme_config.dart';
+import '../../styles/theme_config.dart';
 
 // ignore: must_be_immutable
 class GerenciaPages extends StatefulWidget {

@@ -1,66 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+
+import '../../core/service/data_json.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Example data source
-  final List<String> _suggestions = [
-    'Apple',
-    'Banana',
-    'Cherry',
-    'Date',
-    'Fig',
-    'Grape',
-    'Kiwi',
-  ];
+  static const _pageSize = 20;
+  late Map<String, int> _words;
+  final PagingController<int, String> _pagingController = PagingController(firstPageKey: 0);
 
-  final TextEditingController _typeAheadController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _loadWords();
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
+  }
+
+  Future<void> _loadWords() async {
+    _words = await loadWordsFromJson();
+    setState(() {});
+  }
+
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      final keys = _words.keys.toList();
+      final start = pageKey;
+      final end = pageKey + _pageSize;
+      final newItems = keys.sublist(start, end < keys.length ? end : keys.length);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + newItems.length;
+        _pagingController.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            TypeAheadField<String>(
-              textFieldConfiguration: TextFieldConfiguration(
-                controller: _typeAheadController,
-                decoration: const InputDecoration(
-                  labelText: 'Search',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              suggestionsCallback: (pattern) {
-                return _suggestions.where((item) =>
-                    item.toLowerCase().contains(pattern.toLowerCase()));
-              },
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  title: Text(suggestion),
-                );
-              },
-              onSuggestionSelected: (suggestion) {
-                _typeAheadController.text = suggestion;
-              },
-              noItemsFoundBuilder: (context) => const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'No suggestions found!',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            // Add other widgets here
-          ],
+      appBar: AppBar(
+        title: Text('Word List'),
+      ),
+      body: PagedListView<int, String>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<String>(
+          itemBuilder: (context, word, index) => ListTile(
+            title: Text(word),
+            onTap: () {
+              // Navegar para a tela de detalhes da palavra
+            },
+          ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 }
