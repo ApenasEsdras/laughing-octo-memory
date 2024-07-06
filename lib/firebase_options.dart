@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
@@ -54,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB08NUd1dUSOOoCsuP0HIB0nBu9qNtDqkM',
-    appId: '1:288373616220:android:df14c98eb786fe48ee4099',
+    appId: '1:288373616220:android:95e1110dbc2bc240ee4099',
     messagingSenderId: '288373616220',
     projectId: 'dicio-b9624',
     storageBucket: 'dicio-b9624.appspot.com',
@@ -77,4 +74,14 @@ class DefaultFirebaseOptions {
     authDomain: 'dicio-b9624.firebaseapp.com',
     storageBucket: 'dicio-b9624.appspot.com',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBe69wXpb_Ipp35PkLyoW0FPV9nc1ZMTY0',
+    appId: '1:288373616220:ios:3517a86ead34cbcdee4099',
+    messagingSenderId: '288373616220',
+    projectId: 'dicio-b9624',
+    storageBucket: 'dicio-b9624.appspot.com',
+    iosBundleId: 'com.example.dicio',
+  );
+
 }

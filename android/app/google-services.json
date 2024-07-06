@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:288373616220:android:df14c98eb786fe48ee4099",
+        "mobilesdk_app_id": "1:288373616220:android:dc7595964f790276ee4099",
         "android_client_info": {
-          "package_name": "com.example.dicio"
+          "package_name": "com.android.application"
         }
       },
       "oauth_client": [],

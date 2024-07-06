@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "dicio-b9624"
-  }
+    "default": "dicio-b9624",
+    "y": "dicio-b9624"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
