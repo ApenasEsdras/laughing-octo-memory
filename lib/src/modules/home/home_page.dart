@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-
 import '../../core/service/data_json.dart';
+import 'detalhes_das_frases.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,13 +28,15 @@ class _HomePageState extends State<HomePage> {
     _words = await loadWordsFromJson();
     setState(() {});
   }
-
-  Future<void> _fetchPage(int pageKey) async {
-    try {
-      final keys = _words.keys.toList();
-      final start = pageKey;
-      final end = pageKey + _pageSize;
-      final newItems = keys.sublist(start, end < keys.length ? end : keys.length);
+Future<void> _fetchPage(int pageKey) async {
+  try {
+    final keys = _words.keys.toList();
+    final start = pageKey;
+    final end = pageKey + _pageSize;
+    final newItems = keys.sublist(start, end < keys.length ? end : keys.length);
+    
+    // Verificar se newItems não está vazio antes de adicionar à página
+    if (newItems.isNotEmpty) {
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -42,10 +44,15 @@ class _HomePageState extends State<HomePage> {
         final nextPageKey = pageKey + newItems.length;
         _pagingController.appendPage(newItems, nextPageKey);
       }
-    } catch (error) {
-      _pagingController.error = error;
+    } else {
+      // Se newItems estiver vazio, marcar como a última página
+      _pagingController.appendLastPage([]);
     }
+  } catch (error) {
+    _pagingController.error = error;
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +67,12 @@ class _HomePageState extends State<HomePage> {
             title: Text(word),
             onTap: () {
               // Navegar para a tela de detalhes da palavra
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WordDetailScreen(word: word),
+                ),
+              );
             },
           ),
         ),
