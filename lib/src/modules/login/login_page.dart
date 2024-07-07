@@ -11,13 +11,14 @@ class LoginScreen extends StatelessWidget {
 
   void _signInWithEmailAndPassword(BuildContext context) async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       // Navegar para a próxima tela após o login bem-sucedido
-      Navigator.pushReplacementNamed(context, '/home'); 
+      Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao fazer login: ${e.toString()}')),

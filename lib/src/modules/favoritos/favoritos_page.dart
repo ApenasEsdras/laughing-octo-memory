@@ -20,7 +20,10 @@ class FavoritosPage extends StatelessWidget {
         title: const Text('Favoritos'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('favorites').doc(user.uid).collection('words').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('favoritos')
+            .where('userId', isEqualTo: user.uid)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

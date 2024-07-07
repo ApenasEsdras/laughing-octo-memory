@@ -1,20 +1,22 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: use_build_context_synchronously
 
-import 'detalhes_service.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'detalhes_service.dart';
 
 class WordDetailScreen extends StatelessWidget {
   final String word;
 
-  const WordDetailScreen({Key? key, required this.word}) : super(key: key);
-
-  Future<void> _addToFavorites(String word, context) async {
+  const WordDetailScreen({super.key, required this.word});
+  Future<void> _addToFavorites(String word, BuildContext context) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        FirebaseFirestore.instance.collection('favorites').doc(user.uid).set({
+        await FirebaseFirestore.instance.collection('favoritos').add({
           'word': word,
+          'userId': user.uid,
           'timestamp': DateTime.now(),
         });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,7 +105,7 @@ class WordDetailScreen extends StatelessWidget {
                       : 'N/A'),
                 ),
                 ElevatedButton(
-                  onPressed: () => _addToFavorites(word,context),
+                  onPressed: () => _addToFavorites(word, context),
                   child: const Text('Adicionar aos Favoritos'),
                 ),
                 // Adicionar mais detalhes conforme necessário
