@@ -13,7 +13,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static const _pageSize = 20;
   late Map<String, int> _words;
-  final PagingController<int, String> _pagingController = PagingController(firstPageKey: 0);
+  late List<String> _filteredWords;
+  final PagingController<int, String> _pagingController =
+      PagingController(firstPageKey: 0);
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -22,67 +26,97 @@ class _HomePageState extends State<HomePage> {
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
-  }
 
-  Future<void> _loadWords() async {
-    _words = await loadWordsFromJson();
-    setState(() {});
-  }
-Future<void> _fetchPage(int pageKey) async {
-  try {
-    final keys = _words.keys.toList();
-    final start = pageKey;
-    final end = pageKey + _pageSize;
-    final newItems = keys.sublist(start, end < keys.length ? end : keys.length);
-    
-    // Verificar se newItems não está vazio antes de adicionar à página
-    if (newItems.isNotEmpty) {
-      final isLastPage = newItems.length < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
-      } else {
-        final nextPageKey = pageKey + newItems.length;
-        _pagingController.appendPage(newItems, nextPageKey);
-      }
-    } else {
-      // Se newItems estiver vazio, marcar como a última página
-      _pagingController.appendLastPage([]);
-    }
-  } catch (error) {
-    _pagingController.error = error;
-  }
-}
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Word List'),
-      ),
-      body: PagedListView<int, String>(
-        pagingController: _pagingController,
-        builderDelegate: PagedChildBuilderDelegate<String>(
-          itemBuilder: (context, word, index) => ListTile(
-            title: Text(word),
-            onTap: () {
-              // Navegar para a tela de detalhes da palavra
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => WordDetailScreen(word: word),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _pagingController.dispose();
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    String searchText = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredWords = _words.keys.where((word) => word.toLowerCase().contains(searchText)).toList();
+    });
+    _pagingController.itemList = [];
+    _pagingController.refresh();
+  }
+
+  Future<void> _loadWords() async {
+    _words = await loadWordsFromJson();
+    _filteredWords = _words.keys.toList();
+    setState(() {});
+  }
+
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      final start = pageKey * _pageSize;
+      final end = (pageKey + 1) * _pageSize;
+      final newItems = _filteredWords.sublist(start, end < _filteredWords.length ? end : _filteredWords.length);
+
+      if (newItems.isNotEmpty) {
+        final isLastPage = newItems.length < _pageSize;
+        if (isLastPage) {
+          _pagingController.appendLastPage(newItems);
+        } else {
+          final nextPageKey = pageKey + 1;
+          _pagingController.appendPage(newItems, nextPageKey);
+        }
+      } else {
+        _pagingController.appendLastPage([]);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Word List'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Digite para filtrar as palavras...',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              ),
+              onChanged: (value) {
+                _onSearchChanged();
+              },
+            ),
+          ),
+          Expanded(
+            child: PagedListView<int, String>(
+              pagingController: _pagingController,
+              builderDelegate: PagedChildBuilderDelegate<String>(
+                itemBuilder: (context, word, index) => ListTile(
+                  title: Text(word),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WordDetailScreen(word: word),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
