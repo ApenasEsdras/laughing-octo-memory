@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import '../../core/service/data_json.dart';
-import 'detalhes_das_frases.dart';
+import 'data_json_serve.dart';
+import '../detalhes/detalhes_das_frases.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
