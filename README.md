@@ -27,7 +27,7 @@ Para executar o aplicativo localmente:
 1. **Pré-requisitos**: Certifique-se de ter o ambiente Flutter configurado corretamente.
 2. **Dependências**: Execute `flutter pub get` para instalar todas as dependências necessárias.
 3. **Firebase**: Configure suas credenciais Firebase no arquivo `google-services.json` para a integração correta com o Firestore.
-4. **acesso**: usuario: teste@gamil.com, senha: 123456
+4. **acesso**: usuario: teste@gmail.com, senha: 123456
 
 ## Contribuição
 
