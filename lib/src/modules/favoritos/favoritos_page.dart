@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../detalhes/detalhes_das_frases.dart';
+
 class FavoritosPage extends StatelessWidget {
-  const FavoritosPage({super.key});
+  const FavoritosPage({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,6 @@ class FavoritosPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('favoritos')
-            .where('userId', isEqualTo: user.uid)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -36,12 +37,32 @@ class FavoritosPage extends StatelessWidget {
               child: Text('Nenhum favorito encontrado'),
             );
           } else {
+            // Ordenar os documentos alfabeticamente pelo campo 'word'
+            List<DocumentSnapshot> sortedDocs = snapshot.data!.docs;
+            sortedDocs.sort((a, b) {
+              Map<String, dynamic> dataA = a.data() as Map<String, dynamic>;
+              Map<String, dynamic> dataB = b.data() as Map<String, dynamic>;
+              return (dataA['word'] as String)
+                  .compareTo(dataB['word'] as String);
+            });
+
             return ListView(
-              children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-                return ListTile(
-                  title: Text(data['word']),
-                  // Implemente outras funcionalidades conforme necessário
+              children: sortedDocs.map((DocumentSnapshot document) {
+                Map<String, dynamic> data =
+                    document.data() as Map<String, dynamic>;
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            WordDetailScreen(word: data['word'],fromHomePage: false,),
+                      ),
+                    );
+                  },
+                  child: ListTile(
+                    title: Text(data['word'] as String),
+                  ),
                 );
               }).toList(),
             );

@@ -41,7 +41,9 @@ class _HomePageState extends State<HomePage> {
   void _onSearchChanged() {
     String searchText = _searchController.text.toLowerCase();
     setState(() {
-      _filteredWords = _words.keys.where((word) => word.toLowerCase().contains(searchText)).toList();
+      _filteredWords = _words.keys
+          .where((word) => word.toLowerCase().contains(searchText))
+          .toList();
     });
     _pagingController.itemList = [];
     _pagingController.refresh();
@@ -57,7 +59,8 @@ class _HomePageState extends State<HomePage> {
     try {
       final start = pageKey * _pageSize;
       final end = (pageKey + 1) * _pageSize;
-      final newItems = _filteredWords.sublist(start, end < _filteredWords.length ? end : _filteredWords.length);
+      final newItems = _filteredWords.sublist(
+          start, end < _filteredWords.length ? end : _filteredWords.length);
 
       if (newItems.isNotEmpty) {
         final isLastPage = newItems.length < _pageSize;
@@ -90,7 +93,8 @@ class _HomePageState extends State<HomePage> {
               decoration: const InputDecoration(
                 hintText: 'Digite para filtrar as palavras...',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
               ),
               onChanged: (value) {
                 _onSearchChanged();
@@ -107,7 +111,10 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => WordDetailScreen(word: word),
+                        builder: (context) => WordDetailScreen(
+                          word: word,
+                          fromHomePage: true,
+                        ),
                       ),
                     );
                   },

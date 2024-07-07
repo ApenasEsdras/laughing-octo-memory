@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,28 +8,56 @@ import 'detalhes_service.dart';
 
 class WordDetailScreen extends StatelessWidget {
   final String word;
+  final bool fromHomePage;
 
-  const WordDetailScreen({super.key, required this.word});
-  Future<void> _addToFavorites(String word, BuildContext context) async {
+  const WordDetailScreen(
+      {Key? key, required this.word, required this.fromHomePage});
+
+  Future<void> _addToFavorites(String word, context) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('favoritos').add({
-          'word': word,
-          'userId': user.uid,
-          'timestamp': DateTime.now(),
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$word adicionado aos favoritos')),
-        );
+      if (user != null && fromHomePage) {
+        // Verifica se veio da HomePage
+        // Verifica se a palavra já está nos favoritos do usuário
+        bool isAlreadyFavorite = await _checkIfFavoriteExists(word, user.uid);
+
+        if (!isAlreadyFavorite) {
+          await FirebaseFirestore.instance.collection('favoritos').add({
+            'word': word,
+            'userId': user.uid,
+            'timestamp': DateTime.now(),
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$word adicionado aos favoritos')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$word já está nos favoritos')),
+          );
+        }
       } else {
-        throw Exception('Usuário não autenticado');
+        throw Exception('Não é possível adicionar aos favoritos.');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao adicionar aos favoritos')),
       );
       print('Erro ao adicionar aos favoritos: $e');
+    }
+  }
+
+  Future<bool> _checkIfFavoriteExists(String word, String userId) async {
+    try {
+      QuerySnapshot query = await FirebaseFirestore.instance
+          .collection('favoritos')
+          .where('word', isEqualTo: word)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return query.docs.isNotEmpty;
+    } catch (e) {
+      print('Erro ao verificar se favorito já existe: $e');
+      return true; // Retorna true para evitar adições erradas em caso de erro
     }
   }
 
@@ -104,10 +132,11 @@ class WordDetailScreen extends StatelessWidget {
                           : 'N/A'
                       : 'N/A'),
                 ),
-                ElevatedButton(
-                  onPressed: () => _addToFavorites(word, context),
-                  child: const Text('Adicionar aos Favoritos'),
-                ),
+                if (fromHomePage)
+                  ElevatedButton(
+                    onPressed: () => _addToFavorites(word, context),
+                    child: const Text('Adicionar aos Favoritos'),
+                  ),
                 // Adicionar mais detalhes conforme necessário
               ],
             );
