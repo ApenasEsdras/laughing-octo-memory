@@ -1,22 +1,43 @@
-// ignore_for_file: use_build_context_synchronously, use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import 'detalhes_service.dart';
 
-class WordDetailScreen extends StatelessWidget {
+class WordDetailScreen extends StatefulWidget {
   final String word;
   final bool fromHomePage;
 
   const WordDetailScreen(
       {Key? key, required this.word, required this.fromHomePage});
 
+  @override
+  State<WordDetailScreen> createState() => _WordDetailScreenState();
+}
+
+class _WordDetailScreenState extends State<WordDetailScreen> {
+  final FlutterTts flutterTts = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    flutterTts
+        .setLanguage('en-US'); // Configura o idioma para português brasileiro
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.setSpeechRate(
+        1.0); // Define a taxa de fala (1.0 é a velocidade padrão)
+    await flutterTts.setPitch(1.0); // Define o tom da voz (1.0 é o tom padrão)
+    await flutterTts
+        .speak(text); // Inicia a síntese de voz com o texto fornecido
+  }
+
   Future<void> _addToFavorites(String word, context) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      if (user != null && fromHomePage) {
+      if (user != null && widget.fromHomePage) {
         // Verifica se veio da HomePage
         // Verifica se a palavra já está nos favoritos do usuário
         bool isAlreadyFavorite = await _checkIfFavoriteExists(word, user.uid);
@@ -65,10 +86,10 @@ class WordDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(word),
+        title: Text(widget.word),
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
-        future: fetchWordDetails(word),
+        future: fetchWordDetails(widget.word),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -104,7 +125,7 @@ class WordDetailScreen extends StatelessWidget {
           } else if (!snapshot.hasData || snapshot.data == null) {
             return Center(
               child: Text(
-                'Nenhum detalhe encontrado para "$word"',
+                'Nenhum detalhe encontrado para "${widget.word}"',
                 style: const TextStyle(fontSize: 18),
               ),
             );
@@ -112,13 +133,26 @@ class WordDetailScreen extends StatelessWidget {
             final wordDetails = snapshot.data!;
             return ListView(
               children: [
-                ListTile(
-                  title: const Text('Fonética'),
-                  subtitle: Text(wordDetails['phonetics'] != null &&
-                          wordDetails['phonetics'].isNotEmpty
-                      ? wordDetails['phonetics'][0]['text'] ?? 'N/A'
-                      : 'N/A'),
-                ),
+             ListTile(
+  title: const Text('Fonetica'),
+  subtitle: Text(
+    wordDetails['phonetics'] != null &&
+            wordDetails['phonetics'].isNotEmpty
+        ? wordDetails['phonetics'][0]['text'] ?? 'N/A'
+        : 'N/A',
+  ),
+  trailing: IconButton(
+    icon: const Icon(Icons.volume_up),
+    onPressed: () {
+      if (wordDetails['phonetics'] != null &&
+          wordDetails['phonetics'].isNotEmpty) {
+        _speak(wordDetails['phonetics'][0]['text'] ?? '');
+      }
+    },
+  ),
+),
+
+
                 ListTile(
                   title: const Text('Significado'),
                   subtitle: Text(wordDetails['meanings'] != null &&
@@ -132,9 +166,9 @@ class WordDetailScreen extends StatelessWidget {
                           : 'N/A'
                       : 'N/A'),
                 ),
-                if (fromHomePage)
+                if (widget.fromHomePage)
                   ElevatedButton(
-                    onPressed: () => _addToFavorites(word, context),
+                    onPressed: () => _addToFavorites(widget.word, context),
                     child: const Text('Adicionar aos Favoritos'),
                   ),
                 // Adicionar mais detalhes conforme necessário
